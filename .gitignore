@@ -1,0 +1,27 @@
+# Dependencies
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Data / outputs
+library/**/runs/
+*.log
