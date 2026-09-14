@@ -1,0 +1,37 @@
+{
+  "tools": [
+    {
+      "name": "email.classifier.classify",
+      "description": "Classifies incoming customer support emails into High, Medium, or Low urgency based on the content and suggests the next action.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "emailContent": {
+            "type": "string",
+            "description": "The content of the email to be classified."
+          }
+        },
+        "required": [
+          "emailContent"
+        ]
+      }
+    },
+    {
+      "name": "email.classifier.ground_truth",
+      "description": "Fetches the ground truth classification and suggested next action for an email.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "emailId": {
+            "type": "string",
+            "description": "The unique identifier of the email to fetch the ground truth for."
+          }
+        },
+        "required": [
+          "emailId"
+        ]
+      }
+    }
+  ],
+  "notes": "The task requires classification and action suggestion for customer support emails. The email.classifier class of tools is used to classify emails and fetch ground truth for emails that have it. The email.classifier.ground_truth tool is used to fetch the ground truth for emails that do not have it, classifying them as Low urgency and suggesting asking for more information."
+}

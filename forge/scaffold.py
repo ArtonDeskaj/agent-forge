@@ -16,10 +16,12 @@ Given a task specification, write the SYSTEM PROMPT for an agent that performs i
 Rules:
 - Prefer the simplest design that works. If a single careful prompt suffices, say so in
   the prompt itself and do not invent unnecessary machinery.
-- The prompt must be concrete: role, objective, required procedure, output contract,
-  and how to handle ambiguity and failure.
+- The prompt must be concrete: role, objective, required procedure, output contract, a
+  decision rule for ambiguous or boundary cases, and how to handle failure.
+- State decision rules in GENERAL terms (e.g. "treat confirmed data loss as high").
+  Never embed specific test inputs, test ids, or worked examples as rules.
 - Include a short "Ground truth" rule: rely on real tool output, never assume.
-- No fluff, no placeholders, no secrets.
+- No fluff, no placeholders, no secrets, no commentary about this design process.
 Return a JSON object: {"prompt": "<the full system prompt>"}."""
 
 _TOOLS_SYSTEM = """You are Forge, a meta-agent that designs task-specific AI agents.
@@ -42,8 +44,12 @@ real-world use, each paired with a verifiable expected outcome.
 
 Rules:
 - 8 to 15 tasks. Strong tasks require multiple steps or tool calls; no toy sandboxes.
+- Every task must be COMPLETELY DISTINCT: different scenario, different wording,
+  different customer situation. Never repeat an input, never pad by appending another
+  sentence to an earlier task, never clone a scenario at greater length.
 - Every task needs an "expected" field a verifier can check (exact value, or an explicit
   success criterion a judge can apply).
+- Keep every input under 120 words. Use realistic length, not maximal length.
 - Avoid over-specifying the exact tool-call path; allow valid alternatives.
 - Include at least one genuinely hard edge case.
 Return a JSON object:
@@ -64,6 +70,8 @@ def scaffold(config: Config, spec: str) -> dict:
         config, _EVALS_SYSTEM, f"Task specification:\n{spec}\n\nSystem prompt:\n{prompt}"
     )
 
+    from .harness import _normalize
+
     return {
         "prompt": prompt,
         "tools": {
@@ -71,7 +79,7 @@ def scaffold(config: Config, spec: str) -> dict:
             "notes": tools_obj.get("notes", ""),
         },
         "evals": {
-            "tasks": evals_obj.get("tasks", []),
+            "tasks": _normalize(evals_obj.get("tasks", [])),
             "verifier_notes": evals_obj.get("verifier_notes", ""),
         },
     }

@@ -8,6 +8,7 @@ import sys
 from . import __version__
 from .config import Config
 from .evaluate import evaluate, report_markdown
+from .harness import expand_evals, grade_harness, harness_markdown
 from .library import list_agents, load_agent, save_agent, slugify
 from .refine import refine_loop
 from .scaffold import scaffold
@@ -21,12 +22,26 @@ def _build(args: argparse.Namespace) -> int:
     print(f"Task: {args.spec}")
     print(f"Agent slug: {slug}\n")
 
-    print("[1/4] Scaffolding agent prompt, tools, and eval harness ...")
+    print("[1/5] Scaffolding agent prompt, tools, and eval harness ...")
     built = scaffold(config, args.spec)
     tool_count = len(built["tools"]["tools"])
     task_count = len(built["evals"]["tasks"])
     print(f"      prompt: {len(built['prompt'])} chars, "
           f"tools: {tool_count}, eval tasks: {task_count}")
+
+    if args.refine or args.expand:
+        print("[2/5] Expanding and grading the eval harness ...")
+        built["evals"] = expand_evals(
+            config, args.spec, built["prompt"], built["evals"], log=print
+        )
+    grade = grade_harness(built["evals"])
+    print(f"      harness: {grade['tasks']} tasks, grade {grade['score']:.0%}"
+          f"{' (OK)' if grade['ok'] else ' (THIN)'}")
+    if not grade["ok"] and (args.evaluate or args.refine):
+        print("      refusing to evaluate on a thin/invalid harness — "
+              "expand it first (--refine does this automatically)")
+        if not args.refine:
+            return 1
 
     target = save_agent(
         slug,
@@ -35,13 +50,13 @@ def _build(args: argparse.Namespace) -> int:
         tools=built["tools"],
         evals=built["evals"],
     )
-    print(f"[2/4] Saved to {target}")
+    print(f"[3/5] Saved to {target}")
 
     if not (args.evaluate or args.refine):
         print("\nDone. Re-run with --evaluate or --refine to test the agent.")
         return 0
 
-    print("[3/4] Running evaluation ...")
+    print("[4/5] Running evaluation ...")
     if args.refine:
         prompt, metrics, history = refine_loop(
             config,
@@ -64,12 +79,14 @@ def _build(args: argparse.Namespace) -> int:
         metrics = evaluate(config, built["prompt"], built["evals"])
         history = [{"iteration": 0, "accuracy": metrics["accuracy"]}]
 
-    print(f"[4/4] Accuracy: {metrics['accuracy']:.0%} "
+    print(f"[5/5] Accuracy: {metrics['accuracy']:.0%} "
           f"({metrics['passed']}/{metrics['total']}), "
           f"mean score {metrics['mean_score']}")
 
     report_path = target / "report.md"
-    report_path.write_text(report_markdown(slug, metrics), encoding="utf-8")
+    report_path.write_text(
+        report_markdown(slug, metrics) + "\n" + harness_markdown(grade), encoding="utf-8"
+    )
     print(f"      Report: {report_path}")
     if len(history) > 1:
         trail = " -> ".join(f"{h['accuracy']:.0%}" for h in history)
@@ -117,6 +134,11 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument("--name", help="Explicit agent slug (defaults to derived)")
     build.add_argument("--evaluate", action="store_true", help="Run the eval harness")
     build.add_argument("--refine", action="store_true", help="Run the refine loop")
+    build.add_argument(
+        "--expand",
+        action="store_true",
+        help="Expand the eval harness to a substantial size (implied by --refine)",
+    )
     build.add_argument("--max-iterations", type=int, default=3)
     build.add_argument("--target-accuracy", type=float, default=0.9)
     build.set_defaults(func=_build)

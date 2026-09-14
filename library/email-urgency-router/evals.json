@@ -1,0 +1,47 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "input": "Customer: My order was delivered late. I need a refund. I am very upset. Please fix this immediately.",
+      "expected": "High urgency, Suggest escalating to a supervisor.",
+      "success_criterion": "The output includes the email content, urgency classification (High), and the suggested next action (escalate to supervisor)."
+    },
+    {
+      "id": "t2",
+      "input": "Customer: I ordered a product that never arrived. I need a replacement or refund. Please help.",
+      "expected": "High urgency, Suggest escalating to a supervisor.",
+      "success_criterion": "The output includes the email content, urgency classification (High), and the suggested next action (escalate to supervisor)."
+    },
+    {
+      "id": "t3",
+      "input": "Customer: I received a defective product. I need a replacement. Please fix this.",
+      "expected": "Medium urgency, Suggest providing a solution.",
+      "success_criterion": "The output includes the email content, urgency classification (Medium), and the suggested next action (provide a solution)."
+    },
+    {
+      "id": "t4",
+      "input": "Customer: I have a question about the product features. Please provide more information.",
+      "expected": "Low urgency, Suggest asking for more information.",
+      "success_criterion": "The output includes the email content, urgency classification (Low), and the suggested next action (ask for more information)."
+    },
+    {
+      "id": "t5",
+      "input": "Customer: I am not satisfied with the service. Please improve your service.",
+      "expected": "High urgency, Suggest escalating to a supervisor.",
+      "success_criterion": "The output includes the email content, urgency classification (High), and the suggested next action (escalate to supervisor)."
+    },
+    {
+      "id": "t6",
+      "input": "Customer: My order was delivered late. I need a refund. I am not sure if I should escalate or wait.",
+      "expected": "High urgency, Suggest escalating to a supervisor.",
+      "success_criterion": "The output includes the email content, urgency classification (High), and the suggested next action (escalate to supervisor)."
+    },
+    {
+      "id": "t7",
+      "input": "Customer: I am not happy with the product quality. Please improve the quality.",
+      "expected": "High urgency, Suggest escalating to a supervisor.",
+      "success_criterion": "The output includes the email content, urgency classification (High), and the suggested next action (escalate to supervisor)."
+    }
+  ],
+  "verifier_notes": "Each task includes a realistic customer email scenario, a classification of urgency, and a suggested next action. The output format is consistent and verifiable."
+}

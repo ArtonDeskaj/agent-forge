@@ -21,7 +21,7 @@ class Config:
     api_key: str
     model: str
     temperature: float = 0.2
-    max_tokens: int = 2048
+    max_tokens: int = 4096
     timeout_seconds: int = 120
 
     @staticmethod
@@ -39,7 +39,7 @@ class Config:
             api_key=api_key or os.environ.get("FORGE_API_KEY") or "",
             model=model or os.environ.get("FORGE_MODEL") or DEFAULT_MODEL,
             temperature=float(os.environ.get("FORGE_TEMPERATURE", "0.2")),
-            max_tokens=int(os.environ.get("FORGE_MAX_TOKENS", "2048")),
+            max_tokens=int(os.environ.get("FORGE_MAX_TOKENS", "4096")),
             timeout_seconds=int(os.environ.get("FORGE_TIMEOUT", "120")),
         )
 

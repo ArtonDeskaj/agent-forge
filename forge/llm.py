@@ -77,21 +77,61 @@ def chat_json(config: Config, system: str, user: str, *, retries: int = 2) -> di
 
 
 def parse_json_object(raw: str) -> dict:
-    """Extract the first JSON object from a model response."""
+    """Extract the first JSON object from a model response.
+
+    Small local models often emit raw newlines inside string values or trailing
+    prose. We try strict parsing first, then repair common defects.
+    """
     text = raw.strip()
     if text.startswith("```"):
         text = text.strip("`")
         if text.startswith("json"):
             text = text[4:]
         text = text.strip()
-    try:
-        value = json.loads(text)
-    except json.JSONDecodeError:
-        start = text.find("{")
-        end = text.rfind("}")
-        if start == -1 or end == -1 or end <= start:
-            raise LLMError(f"Model did not return valid JSON: {raw[:300]!r}")
-        value = json.loads(text[start : end + 1])
-    if not isinstance(value, dict):
-        raise LLMError(f"Expected a JSON object, got: {type(value).__name__}")
-    return value
+
+    for candidate in _json_candidates(text):
+        try:
+            value = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, dict):
+            return value
+
+    raise LLMError(f"Model did not return valid JSON: {raw[:300]!r}")
+
+
+def _json_candidates(text: str):
+    """Yield progressively repaired JSON object candidates."""
+    yield text
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end > start:
+        snippet = text[start : end + 1]
+        yield snippet
+        # Repair: escape raw control characters inside strings.
+        yield _escape_control_chars(snippet)
+
+
+def _escape_control_chars(snippet: str) -> str:
+    """Escape unescaped newlines/tabs inside JSON string literals."""
+    out = []
+    in_string = False
+    escaped = False
+    for ch in snippet:
+        if escaped:
+            out.append(ch)
+            escaped = False
+            continue
+        if ch == "\\":
+            out.append(ch)
+            escaped = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            out.append(ch)
+            continue
+        if in_string and ch in "\r\n\t":
+            out.append({ "\n": "\\n", "\r": "\\r", "\t": "\\t" }[ch])
+            continue
+        out.append(ch)
+    return "".join(out)

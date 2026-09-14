@@ -22,8 +22,17 @@ Return a JSON object: {"pass": true|false, "score": 0.0-1.0, "reason": "<short>"
 
 
 def run_task(config: Config, prompt: str, task: dict) -> str:
-    """Have the built agent attempt one evaluation task."""
-    return chat(config, prompt, task["input"])
+    """Have the built agent attempt one evaluation task.
+
+    Provider failures are isolated to the single task so one bad request cannot
+    abort the whole evaluation run. The task input is bounded so a small local
+    model's context window is never the reason the run dies.
+    """
+    user = str(task["input"])[:6000]
+    try:
+        return chat(config, prompt, user, retries=0)
+    except Exception as exc:  # noqa: BLE001
+        return f"[task failed: {exc}]"
 
 
 def judge(config: Config, task: dict, answer: str) -> dict:
