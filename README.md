@@ -2,50 +2,84 @@
 
 A meta-agent that **designs, builds, evaluates, and refines task-specific AI agents**.
 
-Built on researched best practices for agentic systems (Anthropic Engineering + meta-agent research).
+Point it at a task description; it scaffolds a task-specific system prompt, a minimal
+toolset, and an evaluation harness — then iterates until the criteria are met.
 
-## Why
+Built on researched best practices for agentic systems.
 
-Two goals, one project:
+## Status
 
-1. **Personal tool** — a working meta-agent that scaffolds, instantiates, evaluates,
-   and improves small task-specific agents.
-2. **Portfolio project** — a demonstrable implementation of the patterns hiring
-   managers look for: orchestrator-workers, evaluator-optimizer, tool engineering,
-   and evaluation harnesses.
+**v0 — Scaffold.** The builder pipeline is implemented end-to-end and runs against any
+LLM provider you configure. See `docs/architecture.md` for the design.
 
-## Core principles
+## Install
 
-1. **Simplest thing that works first.** A well-prompted single call beats an agent;
-   an agent beats a workflow only when the latency/cost ⇄ accuracy tradeoff pays.
-2. **Workflows vs. agents is a deliberate choice.** Predefined paths = predictable;
-   model-directed = flexible.
-3. **Core loop:** orchestrator-workers (decompose → delegate → synthesize) +
-   evaluator-optimizer (generate → evaluate → refine).
-4. **Tools are contracts with non-deterministic agents** — prototype → evaluate →
-   optimize. Namespaced, context-rich, token-efficient.
-5. **Accumulate, don't rebuild.** Proven subagents go into a reusable library.
+```bash
+python -m venv .venv
+.venv\Scripts\activate      # Windows
+pip install -r requirements.txt
+```
+
+## Configure
+
+Agent Forge talks to any OpenAI-compatible chat endpoint (OpenAI, Ollama, vLLM, ...).
+
+```bash
+set FORGE_BASE_URL=http://localhost:11434/v1    # Ollama example
+set FORGE_API_KEY=ollama
+set FORGE_MODEL=llama3.2
+```
+
+For OpenAI use `https://api.openai.com/v1` and a real key.
+
+## Use
+
+```bash
+# Scaffold an agent for a task
+python -m forge.build "Classify incoming support emails by urgency and route them"
+
+# Scaffold + run the evaluation loop
+python -m forge.build "..." --evaluate
+
+# Scaffold, evaluate, and refine until criteria pass (bounded)
+python -m forge.build "..." --refine --max-iterations 3
+```
+
+Output lands in `library/<slug>/`:
+
+```
+library/support-email-router/
+  spec.json          # the original task spec
+  agent.md           # the generated system prompt
+  tools.json         # the generated tool definitions
+  evals.json         # the generated evaluation harness
+  report.md          # latest evaluation report
+```
 
 ## Layout
 
 ```
-agent-forge/
-  README.md              <- you are here
-  docs/
-    architecture.md      <- the build loop + pattern choices
-    best-practices.md    <- distilled research with sources
-  meta-agent-prompt.md   <- draft system prompt for Forge itself
-  forge/                 <- (planned) the builder implementation
-  library/               <- (planned) accumulated, proven subagents
+forge/
+  __init__.py
+  config.py          # provider + model configuration
+  llm.py             # thin OpenAI-compatible client
+  build.py           # CLI entrypoint + pipeline orchestration
+  scaffold.py        # spec -> agent prompt + tools + evals
+  evaluate.py        # run evals, score outcomes, write report
+  refine.py          # evaluator-optimizer loop
+  library.py         # persist + reuse generated agents
+docs/
+  architecture.md    # the build loop + pattern choices
+  best-practices.md  # distilled research with sources
 ```
 
 ## Roadmap
 
-- [ ] **v0 — Scaffold:** spec → generates a task-specific prompt + minimal toolset + first eval harness
-- [ ] **v0 — Eval harness:** held-out realistic tasks, verifiable outcomes, metrics
-- [ ] **v1 — Refine loop:** evaluator feedback drives prompt/tool-spec improvements, bounded iterations
-- [ ] **v1 — Library:** reuse accumulated agents; new builders start from proven entries
-- [ ] **v2 — Full meta-agent:** Forge system prompt drives the whole loop
+- [x] **v0 — Scaffold:** spec → task-specific prompt + minimal toolset + first eval harness
+- [x] **v0 — Eval harness:** held-out realistic tasks, verifiable outcomes, metrics
+- [x] **v1 — Refine loop:** evaluator feedback drives prompt/tool-spec improvements, bounded iterations
+- [ ] **v1 — Library reuse:** start new builders from proven library entries
+- [ ] **v2 — Full meta-agent:** multi-step orchestration, parallel eval fan-out
 
 ## License
 

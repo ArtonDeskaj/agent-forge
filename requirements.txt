@@ -1,0 +1,7 @@
+# Agent Forge has no hard dependencies beyond the standard library.
+# The LLM client uses urllib so it runs anywhere Python runs.
+#
+# Optional conveniences:
+#   requests>=2.31.0   # nicer HTTP (not required)
+#
+# Python 3.9+

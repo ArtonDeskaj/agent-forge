@@ -1,9 +1,9 @@
-# Dependencies
-__pycache__/
-*.py[cod]
+# Runtime
 .venv/
 venv/
 env/
+__pycache__/
+*.py[cod]
 
 # Environment
 .env
@@ -22,6 +22,6 @@ dist/
 build/
 *.egg-info/
 
-# Data / outputs
+# Generated agents (keep the directory, ignore run noise)
 library/**/runs/
 *.log
