@@ -1,0 +1,4 @@
+{
+  "tools": [],
+  "notes": "This is a single-pass classification task. The system prompt explicitly states that the email and any metadata are supplied directly as input, and that no external tools or multi-step machinery are required. Every step in the procedure (reading the email, extracting signals, assigning urgency, choosing an action, emitting JSON) operates purely on the provided text. Adding tools would introduce unnecessary surface area: no lookup, retrieval, or side-effecting action is needed to produce the triage decision. If the surrounding pipeline later wants to act on the recommendation (e.g., send a reply, escalate, issue a refund), that would be a separate downstream agent with its own toolset — not this classifier."
+}

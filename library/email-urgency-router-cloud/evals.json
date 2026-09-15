@@ -1,0 +1,89 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "input": "Subject: Someone changed my password and I can't get in\nFrom: dana.reyes@northwind-logistics.com\nBody: At 6:12am I got an alert that my password was changed and a new device signed in from an IP in another country. I never did this. I'm locked out of my admin account and I can see two unfamiliar API keys in the audit log. We store customer shipping addresses. Please help immediately.",
+      "expected": "urgency: Critical; category: security; escalate: true; next_action: escalate to security/on-call to lock the account, revoke active sessions and the unknown API keys.",
+      "success_criterion": "urgency == 'Critical' AND escalate == true AND category indicates security/account-takeover AND next_action includes immediate containment (lock account / revoke sessions or keys / escalate to security team)."
+    },
+    {
+      "id": "t2",
+      "input": "Subject: Charged twice for March\nFrom: ap@riverbendfoodbank.org\nBody: Our card was charged $249 twice on March 3 for the same invoice, INV-88213. I've attached both statements. We're a small nonprofit and this is a real hit to our budget. Can you refund the duplicate? Nothing is blocked on our end, but we'd like it sorted this week.",
+      "expected": "urgency: High; category: billing; escalate: true (billing/refunds owner); next_action: verify the duplicate charge against INV-88213 and route to billing to issue a refund or credit.",
+      "success_criterion": "urgency == 'High' AND category == 'billing' AND next_action references verifying the duplicate charge against INV-88213 and either issuing a refund/credit or escalating to the billing/refunds owner. Agent must not promise a refund it has no authority to grant."
+    },
+    {
+      "id": "t3",
+      "input": "Subject: Any plans for SSO with Okta?\nFrom: t.okafor@lumenhealth.io\nBody: Hi, we're evaluating your platform for our 200-person team. We'd need SAML SSO with Okta before we can roll it out. Is that on the roadmap? No rush at all — just planning our Q3 budget.",
+      "expected": "urgency: Low; category: general (feature request); escalate: false; next_action: reply with roadmap/SSO information or route the request to product/sales.",
+      "success_criterion": "urgency == 'Low' AND escalate == false AND next_action is a reply with information or a route to product/sales. Must not be classified Critical or High despite the mention of a Q3 timeline."
+    },
+    {
+      "id": "t4",
+      "input": "Metadata only — no readable content.\nFrom: MAILER-DAEMON@relay.example.net\nSubject: (no subject)\nBody: \"\"\nReceived: 2024-03-04T11:02:19Z\nNote: message body is empty; headers contain no customer identifier.",
+      "expected": "urgency: Low; confidence: low; next_action: route to human triage for manual review (or close with a note); escalate: true or false is acceptable but no customer intent may be invented.",
+      "success_criterion": "urgency == 'Low' AND confidence == 'low' AND next_action mentions routing to human triage or closing with a note. summary/rationale must not fabricate a customer problem, account, or request."
+    },
+    {
+      "id": "t5",
+      "input": "Subject: RE: RE: Export still failing — 3rd time asking\nFrom: m.okafor@brightpathcpa.com\nBody: This is my third email about this. The nightly export has failed every day since Feb 12 and we can't close our books without it. Priya said on Feb 14 it was 'being looked at' and I've heard nothing since. Finance is blocked. Please escalate.",
+      "expected": "urgency: High; category: technical; escalate: true; next_action: escalate to engineering/on-call with the full thread history and the Feb 12 failure date.",
+      "success_criterion": "urgency == 'High' AND escalate == true AND rationale cites repeated contact without resolution and/or the blocked finance workflow. next_action must reference escalation with thread context, not a generic 'we'll look into it'."
+    },
+    {
+      "id": "t6",
+      "input": "Subject: Formal data deletion request — GDPR Article 17\nFrom: legal@harrowpartners.co.uk\nBody: On behalf of our client we request erasure of all personal data held for account #4471. Under GDPR you have one month from receipt; today is the 1st, so the deadline is the 1st of next month. Please confirm in writing. This is a legal request, not a support question.",
+      "expected": "urgency: Critical; category: legal/privacy; escalate: true; next_action: route to the legal/privacy owner and acknowledge the request in writing.",
+      "success_criterion": "urgency == 'Critical' AND escalate == true AND category indicates legal/privacy/compliance AND next_action routes to legal/privacy. Agent must not attempt to fulfil or deny the erasure itself."
+    },
+    {
+      "id": "t7",
+      "input": "Subject: CSV export missing the 'region' column\nFrom: j.alvarez@fernwoodsupply.com\nBody: When I export my dashboard to CSV, the region column comes out blank for about 10% of rows. I can pull the same data from the API instead, so I'm not stuck, but it's annoying. No deadline — just wanted to flag it.",
+      "expected": "urgency: Medium; category: technical; escalate: false; next_action: reply acknowledging the bug and file it with engineering, gathering example rows/account ID if needed.",
+      "success_criterion": "urgency == 'Medium' AND escalate == false AND next_action is a reply plus bug filing (or a request for example rows). Must not be Critical/High given the stated workaround and no deadline."
+    },
+    {
+      "id": "t8",
+      "input": "Subject: Dashboard down for all our users\nFrom: ops@cascadegrocery.com\nBody: Since about 09:40 UTC our whole team (60 users) gets a 502 on every page. We've tried three browsers and two networks. Our support desk can't see any tickets. This is company-wide and we're losing orders by the minute.",
+      "expected": "urgency: Critical; category: technical (outage); escalate: true; next_action: escalate immediately to on-call/incident response with the 09:40 UTC start time and 502 symptom.",
+      "success_criterion": "urgency == 'Critical' AND escalate == true AND next_action is an immediate escalation to on-call/incident response. Rationale must cite the full outage / widespread impact."
+    },
+    {
+      "id": "t9",
+      "input": "Subject: Locked out after too many attempts\nFrom: r.nakamura@vistaprintsolutions.jp\nBody: I fat-fingered my password a few times and now I'm locked out of my account. I need to get back in to submit our quarterly filing, which is due Friday. Can you unlock it or send a reset link?",
+      "expected": "urgency: High; category: account; escalate: false; next_action: send a password reset link or unlock the account.",
+      "success_criterion": "urgency == 'High' AND category == 'account' AND next_action is a credential reset/unlock. Rationale must cite the blocked core workflow and/or the Friday deadline."
+    },
+    {
+      "id": "t10",
+      "input": "Subject: it's not working\nFrom: user8831@protonmail.com\nBody: Hi, the thing you guys changed last week isn't working for me. Can you fix it? Thanks.",
+      "expected": "urgency: Medium; confidence: low; escalate: false; missing_info: non-empty (account/email, which feature, what 'changed last week' refers to, error text or screenshot); next_action: ask the customer for those specifics.",
+      "success_criterion": "urgency == 'Medium' AND confidence == 'low' AND missing_info is a non-empty array AND next_action requests the missing details. Must not be Critical/High on speculation."
+    },
+    {
+      "id": "t11",
+      "input": "Subject: Partnership opportunity — reseller program\nFrom: hello@meridianconsultinggroup.com\nBody: Hi, I run a consultancy and I'd like to resell your product to my clients. Who handles your partner program? Also, do you offer white-labeling? Looking forward to hearing about your commission structure.",
+      "expected": "urgency: Low; category: general (sales/partnership); escalate: false; next_action: route to the partnerships/sales team.",
+      "success_criterion": "urgency == 'Low' AND next_action routes to sales/partnerships (or states the request is outside support scope). Must not be treated as a technical or billing issue."
+    },
+    {
+      "id": "t12",
+      "input": "Subject: Deleted our production project by mistake\nFrom: k.osei@atlasfieldops.com\nBody: I accidentally deleted the 'Q1 Production' project this morning — it had about 4,000 records and 18 months of history. I don't see it in the trash. Is there any way to restore it? We have no other copy. This is really bad.",
+      "expected": "urgency: Critical; category: technical/data-loss; escalate: true; next_action: escalate to engineering/data recovery immediately and gather the project name, deletion timestamp, and account ID.",
+      "success_criterion": "urgency == 'Critical' AND escalate == true AND next_action is an immediate escalation to engineering/data recovery. Rationale must cite suspected data loss / irreversible harm."
+    },
+    {
+      "id": "t13",
+      "input": "Subject: URGENT!!! CRITICAL BUG\nFrom: devon.park@hollowbrookmedia.com\nBody: This is extremely urgent and needs fixing today. The dark mode toggle in settings resets to light every time I log out. It's purely cosmetic and I've just stopped using dark mode, but I wanted to report it. Please treat this as P0.",
+      "expected": "urgency: Low or Medium (not Critical/High); category: general or technical; escalate: false; next_action: log as a low-priority bug and reply acknowledging it.",
+      "success_criterion": "urgency is 'Low' or 'Medium' AND escalate == false AND rationale explicitly states that the customer's stated urgency is contradicted by the cosmetic, non-blocking nature of the issue. Any Critical/High classification fails."
+    },
+    {
+      "id": "t14",
+      "input": "Subject: Re: Billing address update\nFrom: s.lindqvist@nordvindesign.se\nBody: Never mind — I found the setting under Account > Billing and updated it myself. Everything looks right now. Thanks for the quick reply earlier.",
+      "expected": "urgency: Low; category: account or billing; escalate: false; next_action: close with confirmation / no further action needed.",
+      "success_criterion": "urgency == 'Low' AND escalate == false AND next_action is a close/confirmation with no further work. Must not request additional information or open a new investigation."
+    }
+  ],
+  "verifier_notes": "Grade each task against its success_criterion, which is written to be checkable by a judge on the JSON output contract (urgency, confidence, category, summary, next_action, rationale, missing_info, escalate). Key discriminators: (1) urgency label must match the decision rules — Critical only for safety/security, data loss, full outage, or legal/regulatory deadlines; High for blocked core workflows, payment failures, or repeated unresolved contact; Medium for workarounds and vague-but-plausible issues; Low for feature requests, out-of-scope, empty, and already-resolved mail. (2) escalate must be true whenever a human/specialist owner is required (t1, t2, t5, t6, t8, t12) and false for routine self-service or informational cases. (3) The agent must never fabricate order numbers, account IDs, or prior interactions; t4 and t10 specifically test this — t4 must not invent a customer problem, t10 must populate missing_info rather than guess. (4) t13 is the hard edge case: a loud, explicit urgency claim that the facts contradict. Accept Low or Medium, but require the rationale to name the contradiction and require escalate == false; a Critical/High label fails. (5) t2 and t6 test authority boundaries: the agent may recommend a refund or legal response but must route to the owning team rather than committing to an outcome. (6) t11 tests scope discipline — a sales/partnership inquiry is Low and routed, not triaged as a support incident. Allow reasonable variation in category labels (e.g. 'security' vs 'account-security', 'legal' vs 'privacy') and in next_action wording, provided the required owner and step are present. Confidence should be 'low' for t4 and t10; 'high' or 'medium' elsewhere is acceptable."
+}
